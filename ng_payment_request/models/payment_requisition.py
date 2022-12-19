@@ -12,13 +12,6 @@ class AccountMoveInherit(models.Model):
     customer_id = fields.Many2one(
         comodel_name="res.partner", string="Customer/Vendor")
 
-    @api.model_create_multi
-    def create(self, vals):
-        print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-        print(vals)
-        print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-        return super().create(vals)
-
 
 class payment_request_line(models.Model):
     _name = "payment.requisition.line"
@@ -113,7 +106,6 @@ class payment_request(models.Model):
         'readonly', True)]}, help='Tick if you want to update cash register by creating cash transaction line.')
     cash_id = fields.Many2one('account.bank.statement', string='Cash Register', domain=[('journal_id.type', 'in', [
                               'cash']), ('state', '=', 'open')], required=False, readonly=False, states={'draft': [('readonly', False)]})
-    # partner_id = fields.Many2one('res.partner', string="Customer")
 
     @api.model
     def create(self, vals):
@@ -130,14 +122,13 @@ class payment_request(models.Model):
 
     def action_confirm(self):
         if not self.request_line:
-            # raise Warning(_('Warning'),_('Can not confirm request without request lines.'))
             raise exceptions.Warning(
                 _('Can not confirm request without request lines.'))
 
         if not self.department_id.manager_id:
             raise exceptions.Warning(
                 _('Please contact HR to setup a manager for your department.'))
-            # raise Warning(_('Warning'),_('Please contact HR to setup a manager for your department.'))
+
         if self.amount_company_currency <= self.company_id.min_amount:
             body = _(
                 'Payment request %s has been confirmed. Please check and approve.' % (self.name))
@@ -184,7 +175,6 @@ class payment_request(models.Model):
             if line.approved_amount <= 0.0:
                 raise exceptions.Warning(
                     _('Approved amount cannot be less then or equal to Zero.'))
-                # raise Warning(_('Warning'),_('Approved amount cannot be less then or equal to Zero.'))
         if self.amount_company_currency > self.company_id.max_amount:
             self.need_md_approval = True
             body = _(
@@ -226,23 +216,18 @@ class payment_request(models.Model):
         self.manging_director_id = emp.id
         self.state = 'approved'
         self.director_approve_date = fields.Date.context_today(self)
-        body = _('Your request %s has been approved.' % (self.name))
-        # self.notify(body=body, users=[self.employee_id.user_id.partner_id.id])
         body = _(
             'Payment request %s has been approved. Please proceed with the payment.' % (self.name))
         self.notify(body=body, group='account.group_account_manager')
         return True
 
     def action_pay(self):
-        # period_obj = self.env['account.period']
         move_obj = self.env['account.move']
         move_line_obj = self.env['account.move.line']
-        currency_obj = self.env['res.currency']
         statement_line_obj = self.env['account.bank.statement.line']
 
         ctx = dict(self._context or {})
         for record in self:
-
             company_currency = record.company_id.currency_id
             current_currency = record.currency_id
 
