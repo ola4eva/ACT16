@@ -1,6 +1,5 @@
 from odoo import fields, models, api, _, exceptions
 import logging
-# import json
 
 _logger = logging.getLogger(__name__)
 
@@ -71,11 +70,11 @@ class payment_request(models.Model):
     request_line = fields.One2many(
         'payment.requisition.line', 'payment_request_id', string="Lines", copy=False)
     requested_amount = fields.Float(
-        compute="_compute_requested_amount", string='Requested Amount', store=True)
+        compute="_compute_requested_amount", string='Requested Amount', store=True, copy=False)
     approved_amount = fields.Float(
-        compute="_compute_requested_amount", string='Approved Amount', store=True)
+        compute="_compute_requested_amount", string='Approved Amount', store=True, copy=False)
     amount_company_currency = fields.Float(
-        compute="_compute_requested_amount", string='Amount In Company Currency', store=True)
+        compute="_compute_requested_amount", string='Amount In Company Currency', store=True, copy=False)
     currency_id = fields.Many2one('res.currency', string="Currency", required=True,
                                   default=lambda self: self.env.user.company_id.currency_id.id)
     company_id = fields.Many2one('res.company', 'Company', required=True,
@@ -100,7 +99,7 @@ class payment_request(models.Model):
         'Approved By Department Manager On', readonly=True)
     gm_approve_date = fields.Date('First Approved On', readonly=True)
     director_approve_date = fields.Date('Final Approved On', readonly=True)
-    move_id = fields.Many2one('account.move', 'Journal Entry')
+    move_id = fields.Many2one('account.move', 'Journal Entry', copy=False)
     journal_id = fields.Many2one('account.journal', 'Journal')
     update_cash = fields.Boolean(string='Update Cash Register?', readonly=False, states={'draft': [(
         'readonly', True)]}, help='Tick if you want to update cash register by creating cash transaction line.')
@@ -232,9 +231,11 @@ class payment_request(models.Model):
             current_currency = record.currency_id
 
             ctx.update({'date': record.date})
+            sum_line_approved_amount = sum(
+                [line.approved_amount for line in record.request_line])
 
             amount = current_currency.compute(
-                record.approved_amount, company_currency)
+                sum_line_approved_amount, company_currency)
             if record.journal_id.type == 'purchase':
                 sign = 1
             else:
@@ -274,7 +275,7 @@ class payment_request(models.Model):
                     'partner_id': partner_id.id,
                     'customer_id': line.partner_id.id,
                     'currency_id': currency_id,
-                    'amount_currency': company_currency.id != current_currency.id and sign * line.approved_amount or 0.0,
+                    'amount_currency': amount_line,
                     'analytic_distribution': {line.analytic_account_id.id: 100},
                     'analytic_precision': 2,
                     'date': record.date,
@@ -295,7 +296,7 @@ class payment_request(models.Model):
                 'customer_id': line.partner_id.id,
                 'currency_id': currency_id,
                 'analytic_precision': 2,
-                'amount_currency': company_currency.id != current_currency.id and sign * record.approved_amount or 0.0,
+                'amount_currency': -1 * amount,
                 'date': record.date,
             }
             _logger.info(f"Move line cr vals {move_line_cr_vals}")
