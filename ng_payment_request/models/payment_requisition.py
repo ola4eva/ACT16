@@ -1,4 +1,8 @@
 from odoo import fields, models, api, _, exceptions
+import logging
+# import json
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountMoveInherit(models.Model):
@@ -8,9 +12,17 @@ class AccountMoveInherit(models.Model):
     customer_id = fields.Many2one(
         comodel_name="res.partner", string="Customer/Vendor")
 
+    @api.model_create_multi
+    def create(self, vals):
+        print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        print(vals)
+        print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        return super().create(vals)
+
 
 class payment_request_line(models.Model):
     _name = "payment.requisition.line"
+    _description = "Payment Requisition Line"
 
     @api.depends('payment_request_id')
     def check_state(self):
@@ -80,7 +92,7 @@ class payment_request(models.Model):
                               ('approved', 'Approved'),
                               ('paid', 'Paid'),
                               ('refused', 'Refused'),
-                              ('cancelled', 'Cancelled')], track_visibility='onchange', default="draft", string="State")
+                              ('cancelled', 'Cancelled')], tracking=True, default="draft", string="State")
     need_gm_approval = fields.Boolean(
         'Needs First Approval?', copy=False, readonly=True)
     need_md_approval = fields.Boolean(
@@ -230,7 +242,7 @@ class payment_request(models.Model):
 
         ctx = dict(self._context or {})
         for record in self:
-            # period_ids = period_obj.find(record.date)
+
             company_currency = record.company_id.currency_id
             current_currency = record.currency_id
 
@@ -248,8 +260,7 @@ class payment_request(models.Model):
             move_vals = {
                 'date': record.date,
                 'ref': reference,
-                # TODO: Find which period to use for this
-                # 'period_id': period_ids and period_ids.id or False,
+                'currency_id': record.currency_id.id,
                 'journal_id': record.journal_id.id,
             }
 
@@ -261,41 +272,50 @@ class payment_request(models.Model):
                 raise exceptions.Warning(
                     _('Please specify Employee Home Address in the Employee Form!.'))
 
-                # raise Warning(_('Warning'),_('Please specify the Home Address for employee.'))
             for line in record.request_line:
+                # compute the debit lines
                 amount_line = current_currency.compute(
                     line.approved_amount, company_currency)
-                move_line_obj.with_context(check_move_validity=False).create({
+                currency_id = company_currency.id != current_currency.id and current_currency.id or company_currency.id
+
+                move_line_vals = {
                     'name': asset_name,
                     'ref': reference,
                     'move_id': move_id.id,
                     'account_id': line.expense_account_id.id,
                     'credit': 0.0,
                     'debit': amount_line,
-                    # 'period_id': period_ids and period_ids.id or False,
                     'journal_id': journal_id,
                     'partner_id': partner_id.id,
                     'customer_id': line.partner_id.id,
-                    'currency_id': company_currency.id != current_currency.id and current_currency.id or False,
+                    'currency_id': currency_id,
                     'amount_currency': company_currency.id != current_currency.id and sign * line.approved_amount or 0.0,
-                    'analytic_account_id': line.analytic_account_id and line.analytic_account_id.id or False,  # 26 Aug 2016
+                    'analytic_distribution': {line.analytic_account_id.id: 100},
+                    'analytic_precision': 2,
                     'date': record.date,
-                })
-            move_line_obj.with_context(check_move_validity=False).create({
+                }
+                _logger.info(f"--- Move line vals (debit) {move_line_vals}")
+                move_line_obj.with_context(
+                    check_move_validity=False).create(move_line_vals)
+            # for the credit leg
+            move_line_cr_vals = {
                 'name': asset_name,
                 'ref': reference,
                 'move_id': move_id.id,
-                'account_id': record.journal_id.default_credit_account_id.id,
+                'account_id': record.journal_id.default_account_id.id,
                 'debit': 0.0,
                 'credit': amount,
-                # 'period_id': period_ids and period_ids.id or False,
                 'journal_id': journal_id,
                 'partner_id': partner_id.id,
                 'customer_id': line.partner_id.id,
-                'currency_id': company_currency.id != current_currency.id and current_currency.id or False,
+                'currency_id': currency_id,
+                'analytic_precision': 2,
                 'amount_currency': company_currency.id != current_currency.id and sign * record.approved_amount or 0.0,
                 'date': record.date,
-            })
+            }
+            _logger.info(f"Move line cr vals {move_line_cr_vals}")
+            move_line_obj.with_context(
+                check_move_validity=False).create(move_line_cr_vals)
             record.move_id = move_id.id
             if record.update_cash:
                 type = 'general'
@@ -304,7 +324,6 @@ class payment_request(models.Model):
                 if not record.journal_id.type == 'cash':
                     raise exceptions.Warning(
                         _('Journal should match with selected cash register journal.'))
-                    # raise Warning(_('Error'), _('Journal should match with selected cash register journal.'))
                 stline_vals = {
                     'name': record.name or '?',
                     'amount': amount,
