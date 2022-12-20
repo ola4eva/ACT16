@@ -1,0 +1,64 @@
+<odoo>
+  <data>
+
+    <record id="guarantor_type_view_tree" model="ir.ui.view">
+      <field name="name">guarantor.type.view.tree</field>
+      <field name="model">guarantor.type</field>
+      <field name="arch" type="xml">
+        <tree string="Guarantor type">
+          <field name="name" />
+        </tree>
+      </field>
+    </record>
+
+    <record id="guarantor_type_view_form" model="ir.ui.view">
+      <field name="name">guarantor.type.view.form</field>
+      <field name="model">guarantor.type</field>
+      <field name="arch" type="xml">
+        <form string="Guarantor type">
+          <sheet>
+            <group>
+              <group>
+                <field name="name" />
+              </group>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="guarantor_type_view_search" model="ir.ui.view">
+      <field name="name">guarantor.type.view.search</field>
+      <field name="model">guarantor.type</field>
+      <field name="arch" type="xml">
+        <search string="Guarantor type">
+          <field name="name" />
+        </search>
+      </field>
+    </record>
+
+    <record id="guarantor_type_action" model="ir.actions.act_window">
+      <field name="name">Guarantor Type</field>
+      <field name="res_model">guarantor.type</field>
+      <field name="view_mode">tree,form</field>
+      <field name="domain">[]</field>
+      <field name="context">{}</field>
+      <field name="help" type="html">
+        <p class="oe_no_content_create">Click to create a new action</p>
+      </field>
+    </record>
+
+    <menuitem
+      id="guarantor_type_root_menu"
+      name="Guarantor Type"
+      sequence="10" />
+
+    <menuitem
+      id="guarantor_type_menu"
+      name="Guarantor Type"
+      action="guarantor_type_action"
+      parent="guarantor_type_root_menu"
+      sequence="1" />
+
+  </data>
+</odoo>
