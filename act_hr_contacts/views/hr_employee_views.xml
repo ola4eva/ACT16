@@ -9,33 +9,34 @@
             <field name="arch" type="xml">
                 <xpath expr="//notebook" position="inside">
                     <page name="guarantor" string="Guarantor">
-                        <group>
-                            <field name="guarantor_ids" nolabel="1"
-                                context="{'default_guarantor': 'True'}">
-                                <tree>
-                                    <field name="name" />
-                                    <field name="email" />
-                                    <field name="phone" />
-                                    <field name="relationship_id" />
-                                    <field name="guarantor" invisible="0" />
-                                </tree>
-                                <form>
-                                    <sheet>
+
+                        <!-- Add search default guarantor and domain for guarantor -->
+                        <field name="guarantor_ids" nolabel="1"
+                            context="{'default_guarantor': 'True'}">
+                            <tree>
+                                <field name="name" />
+                                <field name="email" />
+                                <field name="phone" />
+                                <field name="relationship_id" />
+                                <field name="guarantor" invisible="0" />
+                            </tree>
+                            <form>
+                                <sheet>
+                                    <group>
                                         <group>
-                                            <group>
-                                                <field name="name" />
-                                                <field name="email" />
-                                                <field name="phone" />
-                                            </group>
-                                            <group>
-                                                <field name="relationship_id" />
-                                                <field name="guarantor" invisible="0" />
-                                            </group>
+                                            <field name="name" />
+                                            <field name="email" />
+                                            <field name="phone" />
                                         </group>
-                                    </sheet>
-                                </form>
-                            </field>
-                        </group>
+                                        <group>
+                                            <field name="relationship_id" />
+                                            <field name="guarantor" invisible="0" />
+                                        </group>
+                                    </group>
+                                </sheet>
+                            </form>
+                        </field>
+
                     </page>
                 </xpath>
             </field>
