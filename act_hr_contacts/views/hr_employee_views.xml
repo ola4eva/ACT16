@@ -9,7 +9,6 @@
             <field name="arch" type="xml">
                 <xpath expr="//notebook" position="inside">
                     <page name="guarantor" string="Guarantor">
-
                         <!-- Add search default guarantor and domain for guarantor -->
                         <field name="guarantor_ids" nolabel="1"
                             context="{'default_guarantor': 'True'}">
@@ -36,12 +35,52 @@
                                 </sheet>
                             </form>
                         </field>
-
+                    </page>
+                    <page name="hmo_info" string="HMO Info">
+                        <field name="hmo_ids"
+                            context="{'employee_id': active_id, 'default_employee_id': active_id}">
+                            <tree string="HMO">
+                                <field name="hmo_id" />
+                                <field name="hmo_number" />
+                                <field name="employee_id" invisible="1" />
+                            </tree>
+                            <form string="HMO">
+                                <group>
+                                    <group>
+                                        <field name="hmo_id" />
+                                        <field name="hmo_number" />
+                                    </group>
+                                    <group>
+                                        <field name="employee_id" invisible="1" />
+                                    </group>
+                                </group>
+                            </form>
+                        </field>
+                    </page>
+                    <page name="pfa_info" string="PFA Info">
+                        <field name="pfa_ids"
+                            context="{'employee_id': active_id, 'default_employee_id': active_id}">
+                            <tree string="PFA">
+                                <field name="pfa_id" />
+                                <field name="pfa_number" />
+                                <field name="employee_id" invisible="1" />
+                            </tree>
+                            <form string="PFA">
+                                <group>
+                                    <group>
+                                        <field name="pfa_id" />
+                                        <field name="pfa_number" />
+                                    </group>
+                                    <group>
+                                        <field name="employee_id" invisible="1" />
+                                    </group>
+                                </group>
+                            </form>
+                        </field>
                     </page>
                 </xpath>
             </field>
         </record>
 
     </data>
-
 </odoo>

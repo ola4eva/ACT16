@@ -26,7 +26,7 @@
     'data': [
         'security/ir.model.access.csv',
         'views/guarantor_views.xml',
-        'views/hr_employee_views.xml',
         'views/res_partner_views.xml',
+        'views/hr_employee_views.xml',
     ],
 }

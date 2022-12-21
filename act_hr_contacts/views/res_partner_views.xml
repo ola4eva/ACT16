@@ -10,9 +10,61 @@
                 <xpath expr="//field[@name='category_id']" position="after">
                     <field name="guarantor" />
                     <field name="relationship_id" />
+                    <field name="hmo" />
+                    <field name="pfa" />
                 </xpath>
             </field>
         </record>
+
+        <record id="res_partner_pmo_action" model="ir.actions.act_window">
+            <field name="name">HMO Info</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('hmo', '=', True)]</field>
+            <field name="context">{'default_hmo': True}</field>
+            <field name="help" type="html">
+                <p class="oe_no_content_create">Click to create a new HMO</p>
+            </field>
+        </record>
+
+        <record id="res_partner_pfa_action" model="ir.actions.act_window">
+            <field name="name">PFA Info</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('pfa', '=', True)]</field>
+            <field name="context">{'default_pfa': True}</field>
+            <field name="help" type="html">
+                <p class="oe_no_content_create">Click to create a new PFA</p>
+            </field>
+        </record>
+
+        <!-- HMO -->
+        <menuitem
+            id="employee_hmo_root_menu"
+            name="HMO"
+            parent="hr.menu_human_resources_configuration"
+        />
+
+        <menuitem
+            id="employee_hmo_menu"
+            name="HMO"
+            action="res_partner_pmo_action"
+            parent="employee_hmo_root_menu"
+            sequence="1" />
+
+        <!-- PFA -->
+        <menuitem
+            id="employee_pfa_root_menu"
+            name="PFA"
+            parent="hr.menu_human_resources_configuration"
+        />
+
+        <menuitem
+            id="employee_pfa_menu"
+            name="PFA"
+            action="res_partner_pfa_action"
+            parent="employee_pfa_root_menu"
+            sequence="1" />
 
     </data>
 </odoo>

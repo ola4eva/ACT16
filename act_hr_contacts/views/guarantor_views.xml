@@ -51,7 +51,8 @@
     <menuitem
       id="guarantor_type_root_menu"
       name="Guarantor Type"
-      sequence="10" />
+      parent="hr.menu_human_resources_configuration"
+    />
 
     <menuitem
       id="guarantor_type_menu"
