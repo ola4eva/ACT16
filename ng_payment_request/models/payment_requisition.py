@@ -277,7 +277,7 @@ class payment_request(models.Model):
                     'currency_id': currency_id,
                     'amount_currency': amount_line,
                     'analytic_distribution': {line.analytic_account_id.id: 100},
-                    'analytic_precision': 2,
+                    # 'analytic_precision': 2,
                     'date': record.date,
                 }
                 _logger.info(f"--- Move line vals (debit) {move_line_vals}")
@@ -295,7 +295,7 @@ class payment_request(models.Model):
                 'partner_id': partner_id.id,
                 'customer_id': line.partner_id.id,
                 'currency_id': currency_id,
-                'analytic_precision': 2,
+                # 'analytic_precision': 2,
                 'amount_currency': -1 * amount,
                 'date': record.date,
             }
