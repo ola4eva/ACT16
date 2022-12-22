@@ -7,9 +7,22 @@
             <field name="model">hr.employee</field>
             <field name="inherit_id" ref="hr.view_employee_form" />
             <field name="arch" type="xml">
+                <xpath expr="//sheet/group" position="inside">
+                    <group string="Health Management Information">
+                        <field name="hmo_id"
+                            context="{'default_hmo': 'True', 'employee_id': active_id,
+                        'default_employee_id': active_id, 'default_is_company': 'True', 'default_company_type': 'company'}" />
+                        <field name="hmo_number" />
+                    </group>
+                    <group string="Pension Information">
+                        <field name="pfa_id"
+                            context="{'default_pfa': 'True', 'employee_id': active_id,
+                        'default_employee_id': active_id, 'default_is_company': 'True', 'default_company_type': 'company'}" />
+                        <field name="pfa_number" />
+                    </group>
+                </xpath>
                 <xpath expr="//notebook" position="inside">
                     <page name="guarantor" string="Guarantor">
-                        <!-- Add search default guarantor and domain for guarantor -->
                         <field name="guarantor_ids" nolabel="1"
                             context="{'default_guarantor': 'True'}">
                             <tree>
@@ -33,48 +46,6 @@
                                         </group>
                                     </group>
                                 </sheet>
-                            </form>
-                        </field>
-                    </page>
-                    <page name="hmo_info" string="HMO Info">
-                        <field name="hmo_ids"
-                            context="{'employee_id': active_id, 'default_employee_id': active_id}">
-                            <tree string="HMO">
-                                <field name="hmo_id" />
-                                <field name="hmo_number" />
-                                <field name="employee_id" invisible="1" />
-                            </tree>
-                            <form string="HMO">
-                                <group>
-                                    <group>
-                                        <field name="hmo_id" />
-                                        <field name="hmo_number" />
-                                    </group>
-                                    <group>
-                                        <field name="employee_id" invisible="1" />
-                                    </group>
-                                </group>
-                            </form>
-                        </field>
-                    </page>
-                    <page name="pfa_info" string="PFA Info">
-                        <field name="pfa_ids"
-                            context="{'employee_id': active_id, 'default_employee_id': active_id}">
-                            <tree string="PFA">
-                                <field name="pfa_id" />
-                                <field name="pfa_number" />
-                                <field name="employee_id" invisible="1" />
-                            </tree>
-                            <form string="PFA">
-                                <group>
-                                    <group>
-                                        <field name="pfa_id" />
-                                        <field name="pfa_number" />
-                                    </group>
-                                    <group>
-                                        <field name="employee_id" invisible="1" />
-                                    </group>
-                                </group>
                             </form>
                         </field>
                     </page>

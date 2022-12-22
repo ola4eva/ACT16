@@ -21,7 +21,8 @@
             <field name="res_model">res.partner</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[('hmo', '=', True)]</field>
-            <field name="context">{'default_hmo': True}</field>
+            <field name="context">{'default_hmo': True, 'default_is_company': True,
+                'default_company_type': 'company'}</field>
             <field name="help" type="html">
                 <p class="oe_no_content_create">Click to create a new HMO</p>
             </field>
@@ -32,7 +33,8 @@
             <field name="res_model">res.partner</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[('pfa', '=', True)]</field>
-            <field name="context">{'default_pfa': True}</field>
+            <field name="context">{'default_pfa': True, 'default_is_company': True,
+                'default_company_type': 'company'}</field>
             <field name="help" type="html">
                 <p class="oe_no_content_create">Click to create a new PFA</p>
             </field>
