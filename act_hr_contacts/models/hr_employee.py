@@ -6,8 +6,8 @@ from odoo import models, fields
 class HrEmployeeBase(models.AbstractModel):
     _inherit = 'hr.employee.base'
 
-    guarantor_ids = fields.Many2many(
-        comodel_name='res.partner', string='Guarantors')
+    guarantor_ids = fields.One2many(
+        comodel_name='res.partner', inverse_name="employee_id", string='Guarantors')
     pfa_id = fields.Many2one('res.partner', string='PFA',
                              domain="[('pfa', '=', True)]")
     pfa_number = fields.Char('PFA Number')

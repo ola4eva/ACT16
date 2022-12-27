@@ -9,3 +9,5 @@ class ResPartner(models.Model):
     pfa = fields.Boolean('Is PFA')
     relationship_id = fields.Many2one(
         comodel_name='guarantor.type', string="Relationship with employee")
+    employee_id = fields.Many2one(
+        comodel_name='hr.employee', string='Employee')
