@@ -30,7 +30,6 @@ class payment_request_line(models.Model):
         'account.analytic.account', string='Analytic Account')
     dummy_state = fields.Char(compute='check_state', string='State')
     partner_id = fields.Many2one('res.partner', string="Customer/Vendor")
-    payment_id = fields.Many2one("account.payment", string="Payment Ref")
 
     @api.onchange('request_amount')
     def _get_request_amount(self):
@@ -47,16 +46,19 @@ class payment_request(models.Model):
     @api.depends('request_line', 'request_line.request_amount', 'request_line.approved_amount')
     def _compute_requested_amount(self):
         for record in self:
+            requested_amount, approved_amount = 0, 0
             for line in record.request_line:
-                record.requested_amount += line.request_amount
-                record.approved_amount += line.approved_amount
+                requested_amount += line.request_amount
+                approved_amount += line.approved_amount
 
-            record.amount_company_currency = record.requested_amount
+            record.amount_company_currency = requested_amount
+            record.requested_amount = requested_amount
+            record.approved_amount = approved_amount
             company_currency = record.company_id.currency_id
             current_currency = record.currency_id
             if company_currency != current_currency:
                 amount = company_currency.compute(
-                    record.requested_amount, current_currency)
+                    requested_amount, current_currency)
                 record.amount_company_currency = amount
 
     name = fields.Char('Name', default="/", copy=False)
@@ -338,28 +340,28 @@ class payment_request(models.Model):
         self.state = 'refused'
         return True
 
-    # def action_pay(self):
-    #     request = super(payment_request, self).action_pay()
-    #     payment = self.env["account.payment"]
-    #     if request:
-    #         for record in self:
-    #             for line in record.request_line:
-    #                 created_payment_id = payment.create(
-    #                     {
-    #                         "name": str(record.name + "  " + line.name),
-    #                         "payment_type": "outbound",
-    #                         "partner_type": "supplier",
-    #                         "journal_id": record.journal_id.id,
-    #                         "partner_id": line.partner_id.id,
-    #                         "amount": record.currency_id.compute(line.approved_amount, record.company_id.currency_id),
-    #                         "payment_method_id": self.payment_method(
-    #                             "outbound"
-    #                         )[0].id,
-    #                     }
-    #                 )
-    #                 created_payment_id.action_post()
-    #                 line.write({"payment_id": created_payment_id.id})
-    #     return request
+    def action_pay(self):
+        request = super(payment_request, self).action_pay()
+        payment = self.env["account.payment"]
+        if request:
+            for record in self:
+                for line in record.request_line:
+                    created_payment_id = payment.create(
+                        {
+                            "name": str(record.name + "  " + line.name),
+                            "payment_type": "outbound",
+                            "partner_type": "supplier",
+                            "journal_id": record.journal_id.id,
+                            "partner_id": line.partner_id.id,
+                            "amount": record.currency_id.compute(line.approved_amount, record.company_id.currency_id),
+                            "payment_method_id": self.payment_method(
+                                "outbound"
+                            )[0].id,
+                        }
+                    )
+                    created_payment_id.action_post()
+                    line.write({"payment_id": created_payment_id.id})
+        return request
 
     def payment_method(self, payment_type):
         return self.env["account.payment.method"].search([("code", "=", "manual"), ("payment_type", "=", payment_type)], limit=1)
