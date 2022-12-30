@@ -12,10 +12,9 @@
         'views/company_view.xml',
         'views/payment_request_report.xml',
         'views/request_report_view.xml',
-        # 'views/journal_view.xml'
     ],
     'depends': [
-        'account',
+        'account_accountant',
         'hr'
     ],
     'installable': True,

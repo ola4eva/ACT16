@@ -201,7 +201,7 @@
             parent="payment_requisition_main_menu" groups="base.group_user" sequence="0"
             action="payment_requisition_action" />
         <menuitem id="payment_request_main_menu" groups="account.group_account_user"
-            name="Payment Requisition" parent="account.menu_finance" />
+            name="Payment Requisition" parent="account_accountant.menu_accounting" />
         <menuitem id="payment_request_menu" name="Payment Requisition"
             parent="payment_request_main_menu" action="payment_requisition_action" />
 
