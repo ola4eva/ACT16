@@ -53,7 +53,7 @@ class EmployeeKpi(models.Model):
     )
     parent_id = fields.Many2one(
         "hr.employee",
-        string="REPORTING TO",
+        string="Assessor",
         required=True,
         readonly=True,
         states={"draft": [("readonly", False)]},
@@ -61,40 +61,6 @@ class EmployeeKpi(models.Model):
     user_id = fields.Many2one(
         "res.users", string="Responsible", default=_get_default_user_id
     )
-    grade_level = fields.Char(
-        "GRADE LEVEL",
-        required=True,
-        readonly=True,
-        states={"draft": [("readonly", False)]},
-    )
-    grade_months = fields.Integer(
-        "MONTHS ON GRADE",
-        required=True,
-        readonly=True,
-        states={"draft": [("readonly", False)]},
-    )
-    kpi_type_id = fields.Many2one(
-        "employee_kpi.employee_kpi.type",
-        string="KPI TYPE",
-        required=True,
-        readonly=True,
-        states={"draft": [("readonly", False)]},
-    )
-    score_financial_perspective = fields.Float(
-        "FINANCIAL PERSPECTIVE", compute="_compute_score_financial_perspective"
-    )
-    score_operations_perspective = fields.Float(
-        "OPERATIONS PERSPECTIVE", compute="_compute_score_operations_perspective"
-    )
-    score_stakeholder_satisfaction_perspective = fields.Float(
-        "STAKEHOLDER SATISFACTION",
-        compute="_compute_score_stakeholder_satisfaction_perspective",
-    )
-    score_learning_growth_culture_perspective = fields.Float(
-        "LEARNING GROWTH & CULTURE",
-        compute="_compute_score_learning_growth_culture_perspective",
-    )
-    score_total = fields.Float(string="Total", compute="_compute_score_total")
     state = fields.Selection(
         SELECTION_KPI,
         string="State",
@@ -110,13 +76,6 @@ class EmployeeKpi(models.Model):
         readonly=True,
         states={"draft": [("readonly", False)]},
     )
-    exceptional_achievements = fields.Text("Exceptional Achievement(s)")
-    areas_of_strength = fields.Text("Area of Strengths")
-    job_improvement_recommendations = fields.Text(
-        "Job Improvement Recommendation(s)")
-    appraiser_overall_comment = fields.Text("Appraiser's Overall Comment")
-    appraisee_overall_comment = fields.Text("Appraisee's Overall Comment")
-    act_final_recommendation = fields.Text("ACT's Final Recommendation")
     hr_comment = fields.Text("HR's comments")
     md1_comment = fields.Text("First MD's comments")
     md2_comment = fields.Text("First MD's comments")
@@ -148,12 +107,9 @@ class EmployeeKpi(models.Model):
             for question in self.template_id.question_ids:
                 kpi_question = Question.create(
                     {
-                        "key_area": question.key_area,
-                        "perspective_id": question.perspective_id.id,
                         "name": question.name,
                         "weight": question.weight,
                         "target": question.target,
-                        "is_section": question.is_section,
                         "state": self.state,
                     }
                 )
@@ -194,53 +150,6 @@ class EmployeeKpi(models.Model):
         url = f"{base_url}/web#{urlencode(params)}"
         self.url = url
 
-    def _compute_score_financial_perspective(self):
-        total = 0.0
-        financial_perspective = self.env.ref(
-            "employee_kpi.perspective_financial")
-        financial_perspective_kpis = self.question_ids.sudo().search(
-            [("perspective_id", "=", financial_perspective.id)]
-        )
-        total = sum(financial_perspective_kpis.mapped("manager_final_score"))
-        self.score_financial_perspective = total
-
-    def _compute_score_operations_perspective(self):
-        operations_perspective = self.env.ref(
-            "employee_kpi.perspective_operations")
-        operations_perspective_kpis = self.question_ids.sudo().search(
-            [("perspective_id", "=", operations_perspective.id)]
-        )
-        total = sum(operations_perspective_kpis.mapped("manager_final_score"))
-        self.score_operations_perspective = total
-
-    def _compute_score_stakeholder_satisfaction_perspective(self):
-        stakeholders_perspective = self.env.ref(
-            "employee_kpi.perspective_stakeholders")
-        stakeholders_perspective_kpis = self.question_ids.sudo().search(
-            [("perspective_id", "=", stakeholders_perspective.id)]
-        )
-        total = sum(stakeholders_perspective_kpis.mapped(
-            "manager_final_score"))
-        self.score_stakeholder_satisfaction_perspective = total
-
-    def _compute_score_learning_growth_culture_perspective(self):
-        growth_perspective = self.env.ref(
-            "employee_kpi.perspective_learning_growth_culture"
-        )
-        growth_perspective_kpis = self.question_ids.sudo().search(
-            [("perspective_id", "=", growth_perspective.id)]
-        )
-        total = sum(growth_perspective_kpis.mapped("manager_final_score"))
-        self.score_learning_growth_culture_perspective = total
-
-    def _compute_score_total(self):
-        self.score_total = (
-            self.score_financial_perspective
-            + self.score_operations_perspective
-            + self.score_stakeholder_satisfaction_perspective
-            + self.score_learning_growth_culture_perspective
-        )
-
 
 class EmployeeKpiQuestion(models.Model):
     _name = "employee_kpi.question"
@@ -248,12 +157,6 @@ class EmployeeKpiQuestion(models.Model):
 
     name = fields.Char(string="Key Performance Indicators",
                        readonly=True, states={'draft': [('readonly', False)]})
-    perspective_id = fields.Many2one(
-        comodel_name="employee_kpi.perspective", string="Perspective", readonly=True, states={'draft': [('readonly', False)]}
-    )
-    key_area = fields.Char(
-        string="Key Result Area", readonly=True, states={'draft': [('readonly', False)]}
-    )
     weight = fields.Float("Weight", readonly=True, states={
                           'draft': [('readonly', False)]})
     target = fields.Float("Target", readonly=True, states={
@@ -262,35 +165,11 @@ class EmployeeKpiQuestion(models.Model):
                                'sent': [('readonly', False)]})
     manager_rating = fields.Float("Manager's Rating", readonly=True, states={
                                   'manager': [('readonly', False)]})
-    self_final_score = fields.Float(
-        "Self Final Score", compute="_compute_self_final_score")
-    manager_final_score = fields.Float(
-        "Manager's Final Score", compute="_compute_manager_final_score")
-    self_comment = fields.Char("Self Comment", readonly=True, states={
-                               'sent': [('readonly', False)]})
     manager_comment = fields.Char("Manager's Comment", readonly=True, states={
                                   'manager': [('readonly', False)]})
     kpi_id = fields.Many2one("employee_kpi.employee_kpi", string="KPI")
     is_section = fields.Boolean("Is Section")
     state = fields.Selection(related="kpi_id.state")
-
-    def _compute_self_final_score(self):
-        for record in self:
-            try:
-                record.self_final_score = (
-                    record.self_rating * record.weight
-                ) / record.target
-            except ZeroDivisionError:
-                record.self_final_score = 0
-
-    def _compute_manager_final_score(self):
-        for record in self:
-            try:
-                record.manager_final_score = (
-                    record.manager_rating * record.weight
-                ) / record.target
-            except ZeroDivisionError:
-                record.manager_final_score = 0
 
     @api.constrains("target")
     def _constrains_target(self):

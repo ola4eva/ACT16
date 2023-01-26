@@ -23,8 +23,10 @@
             <field name="arch" type="xml">
                 <form string="KPI Template">
                     <header>
-                        <button name="action_submit" type="object" string="Confirm" class="oe_highlight" states="draft" />
-                        <button name="action_approve" type="object" string="Approve" class="oe_highlight" states="open" />
+                        <button name="action_submit" type="object" string="Confirm"
+                            class="oe_highlight" states="draft" />
+                        <button name="action_approve" type="object" string="Approve"
+                            class="oe_highlight" states="open" />
                         <field name="state" widget="statusbar" />
                     </header>
                     <sheet>
@@ -40,27 +42,23 @@
                             </group>
                         </group>
                         <notebook>
-                            <page name="key_performance_indicators" string="Key Performance Indicators">
-                                <field name="question_ids" context="{'default_template_id': active_id}">
-                                    <tree decoration-bf="is_section" editable="bottom">
-                                        <field name="perspective_id" attrs="{'invisible': [('is_section', '=', True)], 'required': [('is_section', '=', False)]}" optional="show" />
-                                        <field name="key_area" attrs="{'invisible': [('is_section', '=', True)], 'required': [('is_section', '=', False)]}" optional="show" />
+                            <page name="key_performance_indicators"
+                                string="Key Performance Indicators">
+                                <field name="question_ids"
+                                    context="{'default_template_id': active_id}">
+                                    <tree editable="bottom">
                                         <field name="name" optional="show" />
-                                        <field name="weight" attrs="{'invisible': [('is_section', '=', True)], 'required': [('is_section', '=', False)]}" optional="show" />
-                                        <field name="target" attrs="{'invisible': [('is_section', '=', True)], 'required': [('is_section', '=', False)]}" optional="show" />
-                                        <field name="is_section" invisible="1" />
+                                        <field name="weight" optional="show" sum="Total" />
+                                        <field name="target" optional="show" sum="Total" />
                                         <field name="template_id" invisible="1" />
-                                        <control>
-                                            <create name="add_section_control" string="Add a section" context="{'default_is_section': True}" />
-                                            <create name="add_question_control" string="Add a question" />
-                                        </control>
                                     </tree>
                                 </field>
                             </page>
                         </notebook>
                     </sheet>
                     <div class="oe_chatter">
-                        <field name="message_follower_ids" widget="mail_followers" groups="base.group_user" />
+                        <field name="message_follower_ids" widget="mail_followers"
+                            groups="base.group_user" />
                         <field name="message_ids" widget="mail_thread" />
                     </div>
                 </form>
@@ -93,12 +91,17 @@
             </field>
         </record>
 
-        <menuitem id="employee_kpi_root_menu" name="Employee KPI" sequence="10" web_icon="employee_kpi,static/description/icon.png" />
+        <menuitem id="employee_kpi_root_menu" name="Employee KPI" sequence="10"
+            web_icon="employee_kpi,static/description/icon.png" />
 
-        <menuitem id="employee_kpi_config_menu" name="Configuration" parent="employee_kpi_root_menu" sequence="10" />
+        <menuitem id="employee_kpi_config_menu" name="Configuration" parent="employee_kpi_root_menu"
+            sequence="10" />
 
-        <menuitem id="employee_kpi_template_heading_menu" name="Key Performance Indicator" parent="employee_kpi_config_menu" sequence="1" />
+        <menuitem id="employee_kpi_template_heading_menu" name="Key Performance Indicator"
+            parent="employee_kpi_config_menu" sequence="1" />
 
-        <menuitem id="employee_kpi_template_action_menu" name="KPI Template" action="employee_kpi_template_action" parent="employee_kpi_template_heading_menu" sequence="1" />
+        <menuitem id="employee_kpi_template_action_menu" name="KPI Template"
+            action="employee_kpi_template_action" parent="employee_kpi_template_heading_menu"
+            sequence="1" />
     </data>
 </odoo>

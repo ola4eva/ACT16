@@ -45,9 +45,6 @@
                 <field name="department_id" />
                 <field name="period" placeholder="FY2022/2023..." />
                 <field name="parent_id" />
-                <field name="grade_level" />
-                <field name="grade_months" />
-                <field name="kpi_type_id" />
                 <field name="user_id" />
                 <field name="template_id" />
               </group>
@@ -56,17 +53,17 @@
                   <div class="col-md-11 col-md-offset-1 col-sm-12 no-margin-top"
                     style="background-color: #eee">
                     <h4>Rating Recommendation:</h4>
-                    <p>1- Below Expectations- 0-50%</p>
-                    <p>2 - Needs Improvement- 51-65%</p>
-                    <p>3 - Meets Expectations- 66-85%</p>
-                    <p>4 - Exceeds Expectations- 86-95%</p>
+                    <p>1 - Below Expectations - 0-50%</p>
+                    <p>2 - Needs Improvement - 51-65%</p>
+                    <p>3 - Meets Expectations - 66-85%</p>
+                    <p>4 - Exceeds Expectations - 86-95%</p>
                     <p>5 - Outstanding - 96-100%</p>
                     <br />
                     <h4>Rating (for target)</h4>
-                    <p>Low- 25%</p>
-                    <p>Average- 50%</p>
-                    <p>High- 75%</p>
-                    <p>Advanced- 100%</p>
+                    <p>Low-25%</p>
+                    <p>Average-50%</p>
+                    <p>High-75%</p>
+                    <p>Advanced-100%</p>
                   </div>
                 </div>
               </group>
@@ -74,64 +71,20 @@
             <notebook>
               <page name="performance_measurement" string="Performance Measurement">
                 <field name="question_ids" nolabel="1" context="{'default_kpi_id': active_id}">
-                  <tree decoration-bf="is_section" editable="bottom">
-                    <field name="perspective_id"
-                      attrs="{'invisible': [('is_section', '=', True)], 'required': [('is_section', '=', False)]}"
-                      optional="show" />
-                    <field name="key_area"
-                      attrs="{'invisible': [('is_section', '=', True)], 'required': [('is_section', '=', False)]}"
-                      optional="show" />
+                  <tree editable="bottom">
                     <field name="name" optional="show" required="1" />
-                    <field name="weight"
-                      attrs="{'invisible': [('is_section', '=', True)], 'required': [('is_section', '=', False)]}"
-                      optional="show" />
-                    <field name="target" placeholder="90"
-                      attrs="{'invisible': [('is_section', '=', True)], 'required': [('is_section', '=', False)]}"
-                      optional="show" />
-                    <field name="self_rating" attrs="{'invisible': [('is_section', '=', True)]}"
-                      optional="show" />
-                    <field name="manager_rating" attrs="{'invisible': [('is_section', '=', True)]}"
-                      optional="show" />
-                    <field name="self_final_score" sum="Total"
-                      attrs="{'invisible': [('is_section', '=', True)]}" optional="show" />
-                    <field name="manager_final_score" sum="Total"
-                      attrs="{'invisible': [('is_section', '=', True)]}" optional="show" />
-                    <field name="self_comment" attrs="{'invisible': [('is_section', '=', True)]}"
-                      optional="show" />
-                    <field name="manager_comment" attrs="{'invisible': [('is_section', '=', True)]}"
-                      optional="show" />
+                    <field name="weight" optional="show" sum="Total" />
+                    <field name="target" placeholder="90" sum="Total" optional="show" />
+                    <field name="self_rating" optional="show" sum="Total" />
+                    <field name="manager_comment" optional="show" />
                     <field name="state" invisible="1" />
-                    <field name="is_section" invisible="1" />
                     <field name="kpi_id" invisible="1" />
-                    <control>
-                      <create name="add_section_control" string="Add a section"
-                        context="{'default_is_section': True}" />
-                      <create name="add_question_control" string="Add a question" />
-                    </control>
                   </tree>
                 </field>
-                <group name="note_group" col="6" class="mt-2 mt-md-0">
-                  <group colspan="4" />
-                  <group col="1" colspan="2" string="BALANCE SCORE CARD PERSPECTIVES">
-                    <field name="score_financial_perspective" colspan="4" />
-                    <field name="score_operations_perspective" colspan="4" />
-                    <field name="score_stakeholder_satisfaction_perspective" colspan="4" />
-                    <field name="score_learning_growth_culture_perspective" colspan="4" />
-                    <field name="score_total" colspan="4" />
-                  </group>
-                  <div class="oe_clear" />
-                </group>
+                <div class="oe_clear" />
               </page>
             </notebook>
             <group>
-              <group>
-                <field name="exceptional_achievements" />
-                <field name="areas_of_strength" />
-                <field name="job_improvement_recommendations" />
-                <field name="appraiser_overall_comment" />
-                <field name="appraisee_overall_comment" />
-                <field name="act_final_recommendation" />
-              </group>
               <group>
                 <field name="hr_comment" />
                 <field name="md1_comment" />

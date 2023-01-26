@@ -38,9 +38,6 @@ class EmployeeKpiQuestion(models.Model):
 
     name = fields.Char(string="Key Performance Indicators", required=True)
     weight = fields.Float("Weight")
-    perspective_id = fields.Many2one(
-        comodel_name="employee_kpi.perspective", string="Perspective")
-    is_section = fields.Boolean(string="Is Section")
     target = fields.Float('Target')
     key_area = fields.Char(
         string="Key Result Area")
