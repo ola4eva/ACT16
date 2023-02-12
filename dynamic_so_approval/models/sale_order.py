@@ -4,6 +4,7 @@
 from odoo import models, fields, api, _
 from datetime import datetime
 from odoo.exceptions import UserError
+from odoo.tools import get_lang
 
 
 class SaleOrder(models.Model):
@@ -46,7 +47,8 @@ class SaleOrder(models.Model):
     payment_term_id = fields.Many2one(
         "account.payment.term", readonly=True, states={"draft": [("readonly", False)]}
     )
-    date_order = fields.Datetime(readonly=True, states={"draft": [("readonly", False)]})
+    date_order = fields.Datetime(readonly=True, states={
+                                 "draft": [("readonly", False)]})
     partner_id = fields.Many2one(
         "res.partner", readonly=True, states={"draft": [("readonly", False)]}
     )
@@ -127,13 +129,15 @@ class SaleOrder(models.Model):
                         not self.env.user._is_admin()
                         and self.env.user not in order.next_approved_by_user
                     ):
-                        raise UserError(_("You don't have rights to approved order."))
+                        raise UserError(
+                            _("You don't have rights to approved order."))
                 if order.next_approved_by_group:
                     if (
                         not self.env.user._is_admin()
                         and order.next_approved_by_group not in self.env.user.groups_id
                     ):
-                        raise UserError(_("You don't have rights to approved order."))
+                        raise UserError(
+                            _("You don't have rights to approved order."))
 
                 next_approval_line_id = order.find_order_approval(
                     order.next_approval_line_id
@@ -242,20 +246,52 @@ class SaleOrder(models.Model):
     def _check_date_order(self):
         if self.date_order:
             if self.date_order > datetime.now():
-                raise UserError(_("You are not allowed to post into a future date"))
+                raise UserError(
+                    _("You are not allowed to post into a future date"))
 
 
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
     name = fields.Char(readonly=True, states={"draft": [("readonly", False)]})
-    price_unit = fields.Float(readonly=True, states={"draft": [("readonly", False)]})
+    price_unit = fields.Float(readonly=True, states={
+                              "draft": [("readonly", False)]})
     product_uom_qty = fields.Float(
         readonly=True, states={"draft": [("readonly", False)]}
     )
     tax_id = fields.Many2many(
         "account.tax", readonly=True, states={"draft": [("readonly", False)]}
     )
+
+    @api.onchange('product_id')
+    def _onchange_product_id_warning(self):
+        if not self.product_id:
+            return
+        product = self.product_id
+        product_lang = self.product_id.with_context(
+            lang=get_lang(self.env, self.order_partner_id.lang).code,
+            partner_id=self.order_partner_id.id,
+            company_id=self.company_id.id,
+        )
+        self.name = self._get_product_purchase_description(product_lang)
+        if product.sale_line_warn != 'no-message':
+            if product.sale_line_warn == 'block':
+                self.product_id = False
+
+            return {
+                'warning': {
+                    'title': _("Warning for %s", product.name),
+                    'message': product.sale_line_warn_msg,
+                }
+            }
+
+    def _get_product_purchase_description(self, product_lang):
+        self.ensure_one()
+        name = product_lang.display_name
+        if product_lang.description_purchase:
+            name += '\n' + product_lang.description_purchase
+
+        return name
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
