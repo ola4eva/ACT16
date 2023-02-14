@@ -1,5 +1,6 @@
 from odoo import fields, models, api, _, exceptions
 import logging
+from itertools import groupby
 
 _logger = logging.getLogger(__name__)
 
@@ -28,6 +29,8 @@ class payment_request_line(models.Model):
     expense_account_id = fields.Many2one('account.account', 'Account')
     analytic_account_id = fields.Many2one(
         'account.analytic.account', string='Analytic Account')
+    credit_account_id = fields.Many2one(
+        comodel_name='account.account', string='Pay From')
     dummy_state = fields.Char(compute='check_state', string='State')
     partner_id = fields.Many2one('res.partner', string="Customer/Vendor")
 
@@ -225,7 +228,7 @@ class payment_request(models.Model):
 
     def action_pay(self):
         move_obj = self.env['account.move']
-        move_line_obj = self.env['account.move.line']
+        # move_line_obj = self.env['account.move.line']
         statement_line_obj = self.env['account.bank.statement.line']
 
         ctx = dict(self._context or {})
@@ -253,58 +256,64 @@ class payment_request(models.Model):
                 'journal_id': record.journal_id.id,
             }
 
-            move_id = move_obj.with_context(
-                check_move_validity=False).create(move_vals)
             journal_id = record.journal_id.id
             partner_id = record.employee_id.address_home_id
             if not partner_id:
                 raise exceptions.Warning(
                     _('Please specify Employee Home Address in the Employee Form!.'))
 
-            for line in record.request_line:
-                # compute the debit lines
-                amount_line = current_currency.compute(
-                    line.approved_amount, company_currency)
-                currency_id = company_currency.id != current_currency.id and current_currency.id or company_currency.id
+            move_line_vals = []
 
-                move_line_vals = {
-                    'name': asset_name,
-                    'ref': reference,
-                    'move_id': move_id.id,
-                    'account_id': line.expense_account_id.id,
-                    'credit': 0.0,
-                    'debit': amount_line,
-                    'journal_id': journal_id,
-                    'partner_id': partner_id.id,
-                    'customer_id': line.partner_id.id,
-                    'currency_id': currency_id,
-                    'amount_currency': amount_line,
-                    'analytic_distribution': {line.analytic_account_id.id: 100},
-                    # 'analytic_precision': 2,
-                    'date': record.date,
-                }
-                _logger.info(f"--- Move line vals (debit) {move_line_vals}")
-                move_line_obj.with_context(
-                    check_move_validity=False).create(move_line_vals)
-            # for the credit leg
-            move_line_cr_vals = {
-                'name': asset_name,
-                'ref': reference,
-                'move_id': move_id.id,
-                'account_id': record.journal_id.default_account_id.id,
-                'debit': 0.0,
-                'credit': amount,
-                'journal_id': journal_id,
-                'partner_id': partner_id.id,
-                'customer_id': line.partner_id.id,
-                'currency_id': currency_id,
-                # 'analytic_precision': 2,
-                'amount_currency': -1 * amount,
-                'date': record.date,
-            }
-            _logger.info(f"Move line cr vals {move_line_cr_vals}")
-            move_line_obj.with_context(
-                check_move_validity=False).create(move_line_cr_vals)
+            L = record.request_line.sorted(
+                key=lambda rq: rq.credit_account_id.id)
+
+            def key_func(x): return x['credit_account_id']['name']
+
+            for key, group in groupby(L, key_func):
+                for line in list(group):
+                    # compute the debit lines
+                    amount_line = current_currency.compute(
+                        line.approved_amount, company_currency)
+                    currency_id = company_currency.id != current_currency.id and current_currency.id or company_currency.id
+                    dr_vals = {
+                        'name': asset_name,
+                        'ref': reference,
+                        'account_id': line.expense_account_id.id,
+                        'credit': 0.0,
+                        'debit': amount_line,
+                        'journal_id': journal_id,
+                        'partner_id': line.partner_id.id,
+                        'customer_id': line.partner_id.id,
+                        'currency_id': currency_id,
+                        'amount_currency': amount_line,
+                        'analytic_distribution': {line.analytic_account_id.id: 100},
+                        'date': record.date,
+                    }
+
+                    cr_vals = {
+                        'name': asset_name,
+                        'ref': reference,
+                        'account_id': line.credit_account_id.id,
+                        'debit': 0.0,
+                        'credit': amount_line,
+                        'journal_id': journal_id,
+                        'partner_id': line.partner_id.id,
+                        'customer_id': line.partner_id.id,
+                        'currency_id': currency_id,
+                        'amount_currency': -1 * amount_line,
+                        'date': record.date,
+                    }
+                    move_line_vals.append(cr_vals)
+                    move_line_vals.append(dr_vals)
+
+                key_and_group = {key: list(group)}
+                print(key_and_group)
+
+            move_vals.update(line_ids=[(0, 0, line_val)
+                             for line_val in move_line_vals])
+
+            move_id = move_obj.with_context(
+                check_move_validity=False).create(move_vals)
             record.move_id = move_id.id
             if record.update_cash:
                 type = 'general'

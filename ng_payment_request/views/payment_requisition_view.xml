@@ -81,6 +81,8 @@
                                         <field groups="analytic.group_analytic_accounting"
                                             name="analytic_account_id"
                                             attrs="{'readonly': [('dummy_state', '!=', 'approved')],'required': [('dummy_state', '=', 'approved')]}" />
+                                        <field name="credit_account_id"
+                                            attrs="{'readonly': [('dummy_state', '!=', 'approved')],'required': [('dummy_state', '=', 'approved')]}" />
                                     </tree>
                                 </field>
                                 <group class="oe_subtotal_footer oe_right" name="requested_amount">
@@ -99,7 +101,7 @@
                             <page string="Accounting" groups="account.group_account_user">
                                 <group>
                                     <field name="journal_id"
-                                        domain="[('type','in',['cash','bank']),('company_id','=',company_id)]"
+                                        domain="[('company_id','=',company_id)]"
                                         attrs="{'readonly': [('state', 'not in', ('approved'))],'required': [('state', 'in', ('approved'))]}" />
                                     <field name="move_id" readonly="True"
                                         groups="account.group_account_user" />
