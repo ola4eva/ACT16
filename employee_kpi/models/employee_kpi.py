@@ -78,7 +78,7 @@ class EmployeeKpi(models.Model):
     )
     hr_comment = fields.Text("HR's comments")
     md1_comment = fields.Text("First MD's comments")
-    md2_comment = fields.Text("First MD's comments")
+    md2_comment = fields.Text("Second MD's comments")
     url = fields.Char("url", compute="_get_record_url")
 
     @api.onchange("employee_id")

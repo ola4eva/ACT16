@@ -48,25 +48,22 @@
                 <field name="user_id" />
                 <field name="template_id" />
               </group>
-              <group>
-                <div class="row">
-                  <div class="col-md-11 col-md-offset-1 col-sm-12 no-margin-top"
-                    style="background-color: #eee">
-                    <h4>Rating Recommendation:</h4>
-                    <p>1 - Below Expectations - 0-50%</p>
-                    <p>2 - Needs Improvement - 51-65%</p>
-                    <p>3 - Meets Expectations - 66-85%</p>
-                    <p>4 - Exceeds Expectations - 86-95%</p>
-                    <p>5 - Outstanding - 96-100%</p>
-                    <br />
-                    <h4>Rating (for target)</h4>
-                    <p>Low-25%</p>
-                    <p>Average-50%</p>
-                    <p>High-75%</p>
-                    <p>Advanced-100%</p>
-                  </div>
-                </div>
-              </group>
+              <!-- class="col-md-11 col-md-offset-1 col-sm-12 no-margin-top" -->
+              <div
+                style="background-color: #eee">
+                <h4>Rating Recommendation:</h4>
+                <p>1 - Below Expectations - 0-50%</p>
+                <p>2 - Needs Improvement - 51-65%</p>
+                <p>3 - Meets Expectations - 66-85%</p>
+                <p>4 - Exceeds Expectations - 86-95%</p>
+                <p>5 - Outstanding - 96-100%</p>
+                <br />
+                <h4>Rating (for target)</h4>
+                <p>Low-25%</p>
+                <p>Average-50%</p>
+                <p>High-75%</p>
+                <p>Advanced-100%</p>
+              </div>
             </group>
             <notebook>
               <page name="performance_measurement" string="Performance Measurement">
@@ -76,19 +73,20 @@
                     <field name="weight" optional="show" sum="Total" />
                     <field name="target" placeholder="90" sum="Total" optional="show" />
                     <field name="self_rating" optional="show" sum="Total" />
+                    <field name="manager_rating" optional="show" sum="Total" />
                     <field name="manager_comment" optional="show" />
                     <field name="state" invisible="1" />
                     <field name="kpi_id" invisible="1" />
                   </tree>
                 </field>
-                <div class="oe_clear" />
+                <div class="oe_separator" />
               </page>
             </notebook>
             <group>
               <group>
-                <field name="hr_comment" />
                 <field name="md1_comment" />
                 <field name="md2_comment" />
+                <field name="hr_comment" />
               </group>
             </group>
           </sheet>
