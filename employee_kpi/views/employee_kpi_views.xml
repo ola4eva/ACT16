@@ -48,7 +48,6 @@
                 <field name="user_id" />
                 <field name="template_id" />
               </group>
-              <!-- class="col-md-11 col-md-offset-1 col-sm-12 no-margin-top" -->
               <div
                 style="background-color: #eee">
                 <h4>Rating Recommendation:</h4>
